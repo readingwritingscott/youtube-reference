@@ -527,6 +527,9 @@
       white-space: nowrap;
       min-width: 30px;
       line-height: 28px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
     }
     .filter-btns { display: flex; gap: 5px; flex-wrap: wrap; }
     .flt-btn {
@@ -648,7 +651,10 @@
     <div class="filter-bar" id="filterBar">
       <div class="filter-row">
         <div class="filter-group">
-          <span class="filter-label">기여도</span>
+          <span class="filter-label">
+            기여도
+            <span class="metric-info">?<span class="tip">채널 평균 조회수 대비 이 영상의 조회수 비율. 채널 내에서 얼마나 두드러지는지 나타냅니다.</span></span>
+          </span>
           <div class="filter-btns">
             <button class="flt-btn" data-type="contribution" data-grade="excellent" onclick="toggleGradeFilter(this)">Excellent</button>
             <button class="flt-btn" data-type="contribution" data-grade="great"     onclick="toggleGradeFilter(this)">Great</button>
@@ -658,7 +664,10 @@
           </div>
         </div>
         <div class="filter-group">
-          <span class="filter-label">성과도</span>
+          <span class="filter-label">
+            성과도
+            <span class="metric-info">?<span class="tip">구독자 수 대비 이 영상의 조회수 비율. 알고리즘 추천 강도를 나타냅니다.</span></span>
+          </span>
           <div class="filter-btns">
             <button class="flt-btn" data-type="performance" data-grade="excellent" onclick="toggleGradeFilter(this)">Excellent</button>
             <button class="flt-btn" data-type="performance" data-grade="great"     onclick="toggleGradeFilter(this)">Great</button>
@@ -980,18 +989,12 @@ function buildCard({ video, channel, performanceRatio, contributionRatio, savedA
       <hr class="card-divider">
       <div class="metrics">
         <div class="metric">
-          <div class="metric-label">
-            기여도
-            <span class="metric-info">?<span class="tip">채널 평균 조회수 대비 이 영상의 조회수 비율. 채널 내에서 얼마나 두드러지는지 나타냅니다.</span></span>
-          </div>
+          <div class="metric-label">기여도</div>
           <span class="metric-grade ${cg.cls}">${cg.label}</span>
           <div class="metric-value">${esc(fmtRatio(contributionRatio))}</div>
         </div>
         <div class="metric">
-          <div class="metric-label">
-            성과도
-            <span class="metric-info">?<span class="tip">구독자 수 대비 이 영상의 조회수 비율. 알고리즘 추천 강도를 나타냅니다.</span></span>
-          </div>
+          <div class="metric-label">성과도</div>
           <span class="metric-grade ${pg.cls}">${pg.label}</span>
           <div class="metric-value">${esc(fmtRatio(performanceRatio))}</div>
         </div>
