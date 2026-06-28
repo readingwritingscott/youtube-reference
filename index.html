@@ -65,7 +65,60 @@
       color: var(--text-primary);
       white-space: nowrap;
       letter-spacing: -0.3px;
+      cursor: pointer;
+      user-select: none;
     }
+    .logo:hover { color: var(--accent); }
+
+    /* 최근 검색 드롭다운 */
+    .search-history {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      z-index: 150;
+      overflow: hidden;
+    }
+    .search-history.visible { display: block; }
+    .history-header {
+      padding: 8px 14px 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .history-item:hover { background: var(--bg); }
+    .history-keyword { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); }
+    .history-del {
+      width: 20px;
+      height: 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-tertiary);
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .history-del:hover { background: var(--border); color: var(--text-primary); }
     .tabs {
       display: flex;
       gap: 2px;
@@ -122,7 +175,7 @@
       flex-wrap: wrap;
       margin-bottom: 16px;
     }
-    .search-input-wrap { flex: 1; min-width: 200px; }
+    .search-input-wrap { flex: 1; min-width: 200px; position: relative; }
     .search-input {
       width: 100%;
       height: 40px;
@@ -622,7 +675,7 @@
 <!-- 헤더 -->
 <header class="header">
   <div class="header-inner">
-    <span class="logo">YouTube 레퍼런스 수집기</span>
+    <span class="logo" onclick="goHome()">YouTube 레퍼런스 수집기</span>
     <div class="tabs">
       <button class="tab-btn active" id="tabSearch" onclick="switchTab('search')">검색</button>
       <button class="tab-btn" id="tabBookmark" onclick="switchTab('bookmark')">북마크</button>
@@ -643,7 +696,8 @@
   <div class="tab-panel active" id="panelSearch">
     <form class="search-form" id="searchForm" onsubmit="handleSearch(event)">
       <div class="search-input-wrap">
-        <input class="search-input" type="text" id="keywordInput" placeholder="검색어를 입력하세요...">
+        <input class="search-input" type="text" id="keywordInput" placeholder="검색어를 입력하세요..." autocomplete="off">
+        <div class="search-history" id="searchHistory"></div>
       </div>
       <select class="form-select" id="sortSelect">
         <option value="relevance">관련성</option>
@@ -772,6 +826,7 @@
    상수
 =================================================== */
 const KEY_API     = 'youtube_api_key';
+const KEY_HISTORY = 'youtube_search_history';
 const KEY_BM      = 'youtube_bookmarks';
 const KEY_QUOTA   = 'youtube_quota_used';
 const KEY_QDATE   = 'youtube_quota_date';
@@ -1454,6 +1509,70 @@ function renderBookmarks() {
 }
 
 /* ===================================================
+   홈으로 이동
+=================================================== */
+function goHome() {
+  switchTab('search');
+  document.getElementById('keywordInput').value = '';
+  document.getElementById('resultsInfo').classList.remove('visible');
+  document.getElementById('filterBar').classList.remove('visible');
+  document.getElementById('searchOutput').innerHTML = `
+    <div class="state-view">
+      <div class="state-icon">🎬</div>
+      <div class="state-title">YouTube 레퍼런스 수집기</div>
+      <div class="state-desc">검색어를 입력하고 검색 버튼을 눌러보세요.</div>
+    </div>`;
+  _allItems = []; _items = []; _nextPageToken = null;
+  if (_scrollObserver) _scrollObserver.disconnect();
+}
+
+/* ===================================================
+   최근 검색어
+=================================================== */
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem(KEY_HISTORY) || '[]'); } catch { return []; }
+}
+
+function addToHistory(keyword) {
+  if (!keyword.trim()) return;
+  let history = getHistory().filter(k => k !== keyword);
+  history.unshift(keyword);
+  localStorage.setItem(KEY_HISTORY, JSON.stringify(history.slice(0, 10)));
+}
+
+function removeFromHistory(keyword) {
+  localStorage.setItem(KEY_HISTORY, JSON.stringify(getHistory().filter(k => k !== keyword)));
+  renderHistory();
+}
+
+function renderHistory() {
+  const history = getHistory();
+  const el = document.getElementById('searchHistory');
+  if (!history.length) { el.classList.remove('visible'); return; }
+
+  el.innerHTML = `<div class="history-header">최근 검색</div>` +
+    history.map(k => `
+      <div class="history-item">
+        <span class="history-keyword">🕐 ${esc(k)}</span>
+        <button class="history-del" title="삭제">×</button>
+      </div>`).join('');
+
+  el.querySelectorAll('.history-item').forEach((item, i) => {
+    item.addEventListener('click', () => {
+      document.getElementById('keywordInput').value = history[i];
+      el.classList.remove('visible');
+      document.getElementById('searchForm').dispatchEvent(new Event('submit', { cancelable: true }));
+    });
+    item.querySelector('.history-del').addEventListener('click', e => {
+      e.stopPropagation();
+      removeFromHistory(history[i]);
+    });
+  });
+
+  el.classList.add('visible');
+}
+
+/* ===================================================
    탭 전환
 =================================================== */
 function switchTab(name) {
@@ -1478,6 +1597,8 @@ async function handleSearch(e) {
 
   const keyword = document.getElementById('keywordInput').value.trim();
   if (!keyword) { document.getElementById('keywordInput').focus(); return; }
+  addToHistory(keyword);
+  document.getElementById('searchHistory').classList.remove('visible');
 
   const out = document.getElementById('searchOutput');
   showLoading(out);
@@ -1582,6 +1703,15 @@ document.getElementById('apiKeyModal').addEventListener('click', e => {
 
 document.getElementById('apiKeyInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('saveKeyBtn').click();
+});
+
+// 검색어 입력창 포커스 시 최근 검색 표시
+document.getElementById('keywordInput').addEventListener('focus', renderHistory);
+document.getElementById('keywordInput').addEventListener('blur', () => {
+  setTimeout(() => document.getElementById('searchHistory').classList.remove('visible'), 200);
+});
+document.getElementById('keywordInput').addEventListener('input', () => {
+  document.getElementById('searchHistory').classList.remove('visible');
 });
 
 /* ===================================================
