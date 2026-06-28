@@ -198,7 +198,7 @@
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      overflow: hidden;
+      overflow: visible; /* 툴팁이 카드 밖으로 나올 수 있게 */
       box-shadow: var(--shadow-card);
       transition: transform 0.15s, box-shadow 0.15s;
       display: flex;
@@ -214,6 +214,7 @@
       cursor: pointer;
       background: #F3F4F6;
       flex-shrink: 0;
+      border-radius: var(--radius-md) var(--radius-md) 0 0; /* 카드 상단 모서리 유지 */
     }
     .card-thumb img {
       width: 100%;
@@ -814,10 +815,11 @@ async function apiGet(url, params) {
   return res.json();
 }
 
-async function searchVideos(keyword, { order, maxResults, period }) {
+async function searchVideos(keyword, { order, maxResults, period, pageToken }) {
   const p = { part: 'snippet', q: keyword, type: 'video', maxResults, order };
   const after = periodToISO(period);
   if (after) p.publishedAfter = after;
+  if (pageToken) p.pageToken = pageToken;
   return apiGet('https://www.googleapis.com/youtube/v3/search', p);
 }
 
@@ -919,8 +921,12 @@ function esc(s) {
    렌더링
 =================================================== */
 // 검색 결과 아이템 저장
-let _allItems = []; // 전체 결과 (필터링 전)
-let _items    = []; // 북마크 참조용 (= _allItems)
+let _allItems        = []; // 전체 결과 (필터링 전)
+let _items           = []; // 북마크 참조용 (= _allItems)
+let _nextPageToken   = null;
+let _isLoadingMore   = false;
+let _lastSearchParams = null;
+let _scrollObserver  = null;
 
 function buildCard({ video, channel, performanceRatio, contributionRatio, savedAt, isBookmarkView }) {
   const sn    = video.snippet || {};
@@ -1099,6 +1105,102 @@ function periodCutoff(p) {
   return d;
 }
 
+// 개별 아이템이 현재 필터를 통과하는지 확인
+function passesFilters(item) {
+  if (filterState.contribution.size > 0 &&
+      !filterState.contribution.has(gradeContribution(item.contributionRatio).cls)) return false;
+  if (filterState.performance.size > 0 &&
+      !filterState.performance.has(gradePerformance(item.performanceRatio).cls)) return false;
+  const cutoff = periodCutoff(filterState.period);
+  if (cutoff) {
+    const pub = item.video.snippet?.publishedAt;
+    if (!pub || new Date(pub) < cutoff) return false;
+  }
+  if (filterState.contentType) {
+    const secs = getDurationSeconds(item.video.contentDetails?.duration);
+    if (secs === null) return filterState.contentType === 'normal';
+    if (filterState.contentType === 'shorts' ? secs > 60 : secs <= 60) return false;
+  }
+  return true;
+}
+
+// 무한 스크롤 옵저버 설정
+function setupScrollObserver() {
+  if (_scrollObserver) _scrollObserver.disconnect();
+  const sentinel = document.getElementById('scrollSentinel');
+  if (!sentinel) return;
+  _scrollObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && _nextPageToken && !_isLoadingMore) loadMoreResults();
+  }, { rootMargin: '300px' });
+  _scrollObserver.observe(sentinel);
+}
+
+// 다음 페이지 로드 (무한 스크롤)
+async function loadMoreResults() {
+  if (_isLoadingMore || !_nextPageToken || !_lastSearchParams) return;
+  _isLoadingMore = true;
+
+  const sentinel = document.getElementById('scrollSentinel');
+  if (sentinel) sentinel.innerHTML = '<div class="spinner" style="width:22px;height:22px;border-width:2px;margin:0 auto;"></div>';
+
+  try {
+    const searchResp = await searchVideos(_lastSearchParams.keyword, {
+      ..._lastSearchParams,
+      pageToken: _nextPageToken,
+    });
+
+    _nextPageToken = searchResp.nextPageToken || null;
+    const searchItems = searchResp.items || [];
+
+    if (searchItems.length) {
+      const videoIds   = searchItems.map(i => i.id.videoId).filter(Boolean);
+      const channelIds = [...new Set(searchItems.map(i => i.snippet.channelId).filter(Boolean))];
+
+      const [videoResp, channelResp] = await Promise.all([
+        fetchVideoDetails(videoIds),
+        channelIds.length ? fetchChannelDetails(channelIds) : Promise.resolve({ items: [] }),
+      ]);
+
+      const merged   = mergeData(videoResp, channelResp);
+      const startIdx = _allItems.length;
+      const newItems = merged.map(({ video, channel }, idx) => ({
+        video, channel, ...calculateMetrics(video, channel), _origIndex: startIdx + idx,
+      }));
+
+      _allItems = [..._allItems, ...newItems];
+      _items    = _allItems;
+      addQuotaUsage(102);
+
+      // 현재 필터를 통과하는 아이템만 그리드에 직접 추가
+      const grid = document.querySelector('#searchOutput .grid');
+      if (grid) {
+        newItems.filter(passesFilters).forEach(item => grid.appendChild(buildCard(item)));
+      }
+
+      // 결과 카운트 갱신
+      const total = _allItems.length;
+      const shown = document.querySelectorAll('#searchOutput .card').length;
+      document.getElementById('resultsCount').textContent =
+        shown === total ? `검색 결과 ${total}개` : `검색 결과 ${shown} / ${total}개`;
+    }
+
+    // 센티넬 갱신
+    if (sentinel) {
+      if (_nextPageToken) {
+        sentinel.innerHTML = '<div style="padding:20px 0;color:var(--text-tertiary);font-size:12px;text-align:center;">스크롤하면 더 불러옵니다</div>';
+        setupScrollObserver();
+      } else {
+        sentinel.innerHTML = '<div style="padding:20px 0;color:var(--text-tertiary);font-size:12px;text-align:center;">모든 결과를 불러왔습니다</div>';
+      }
+    }
+  } catch (err) {
+    console.error('추가 로드 오류:', err);
+    if (sentinel) sentinel.innerHTML = '<div style="padding:16px 0;color:#DC2626;font-size:12px;text-align:center;">불러오기 실패. 잠시 후 다시 시도하세요.</div>';
+  } finally {
+    _isLoadingMore = false;
+  }
+}
+
 function applyFilters() {
   const out = document.getElementById('searchOutput');
   let result = [..._allItems];
@@ -1148,6 +1250,8 @@ function applyFilters() {
   }
 
   // 렌더
+  if (_scrollObserver) _scrollObserver.disconnect();
+
   if (!result.length) {
     out.innerHTML = `
       <div class="state-view">
@@ -1161,6 +1265,15 @@ function applyFilters() {
     result.forEach(item => grid.appendChild(buildCard(item)));
     out.innerHTML = '';
     out.appendChild(grid);
+
+    // 무한 스크롤 센티넬
+    const sentinel = document.createElement('div');
+    sentinel.id = 'scrollSentinel';
+    if (_nextPageToken) {
+      sentinel.innerHTML = '<div style="padding:20px 0;color:var(--text-tertiary);font-size:12px;text-align:center;">스크롤하면 더 불러옵니다</div>';
+      out.appendChild(sentinel);
+      setupScrollObserver();
+    }
   }
 
   // 결과 카운트
@@ -1351,6 +1464,10 @@ async function handleSearch(e) {
       video, channel, ...calculateMetrics(video, channel), _origIndex: idx,
     }));
     _items = _allItems; // 북마크 참조용
+
+    // 무한 스크롤용 상태 저장
+    _nextPageToken    = searchResp.nextPageToken || null;
+    _lastSearchParams = { keyword, order, maxResults, period };
 
     // 할당량: search 100 + videos 1 + channels 1
     addQuotaUsage(102);
