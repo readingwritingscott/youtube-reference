@@ -304,22 +304,23 @@
     .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .metric { background: var(--bg); border-radius: var(--radius-sm); padding: 8px; }
     .metric-label { font-size: 10px; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 500; }
-    .metric-grade {
+    /* 별점 */
+    .grade-stars {
       display: inline-block;
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 4px;
+      font-size: 14px;
+      letter-spacing: 1px;
+      line-height: 1;
       margin-bottom: 4px;
-      color: #fff;
     }
-    .metric-grade.excellent { background: var(--grade-excellent); }
-    .metric-grade.great { background: var(--grade-great); }
-    .metric-grade.good { background: var(--grade-good); }
-    .metric-grade.soso { background: var(--grade-soso); }
-    .metric-grade.bad { background: var(--grade-bad); }
-    .metric-grade.na { background: #E5E7EB; color: var(--text-secondary); }
+    .grade-stars.excellent { color: var(--grade-excellent); }
+    .grade-stars.great     { color: var(--grade-great); }
+    .grade-stars.good      { color: var(--grade-good); }
+    .grade-stars.soso      { color: var(--grade-soso); }
+    .grade-stars.bad       { color: var(--grade-bad); }
+    .grade-stars.na        { color: var(--text-tertiary); font-size: 11px; }
+    .grade-stars-empty     { color: #D1D5DB; }
     .metric-value { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .metric-desc  { font-size: 10px; color: var(--text-tertiary); margin-top: 2px; line-height: 1.3; }
     /* 지표 설명 툴팁 */
     .metric-info {
       display: inline-flex;
@@ -348,15 +349,27 @@
       color: #fff;
       font-size: 11px;
       font-weight: 400;
-      line-height: 1.55;
-      padding: 8px 10px;
+      line-height: 1.6;
+      padding: 10px 12px;
       border-radius: var(--radius-sm);
-      width: 160px;
+      width: 230px;
       white-space: normal;
       z-index: 50;
       pointer-events: none;
       font-family: var(--font-body);
     }
+    .tip-formula {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #9CA3AF;
+      margin-bottom: 7px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid #374151;
+    }
+    .tip-grades { display: flex; flex-direction: column; gap: 2px; }
+    .tip-grade-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; }
+    .tip-grade-row span:first-child { color: #FCD34D; letter-spacing: 1px; }
+    .tip-grade-row span:last-child  { color: #9CA3AF; }
     .metric-info .tip::after {
       content: '';
       position: absolute;
@@ -531,11 +544,20 @@
       align-items: center;
       gap: 3px;
     }
-    .filter-btns { display: flex; gap: 5px; flex-wrap: wrap; }
+    /* 그룹 타원 컨테이너 */
+    .filter-btns {
+      display: flex;
+      gap: 2px;
+      flex-wrap: wrap;
+      border: 1.5px solid var(--border);
+      border-radius: 40px;
+      padding: 3px 6px;
+      background: var(--card-bg);
+    }
     .flt-btn {
-      height: 28px;
-      padding: 0 11px;
-      border: 1px solid var(--border);
+      height: 26px;
+      padding: 0 10px;
+      border: none;
       border-radius: 20px;
       background: transparent;
       font-family: var(--font-body);
@@ -546,15 +568,15 @@
       transition: all 0.15s;
       white-space: nowrap;
     }
-    .flt-btn:hover { border-color: var(--text-tertiary); color: var(--text-primary); }
-    /* 단일 선택 활성 (기간 · 정렬) */
-    .flt-btn.active { background: var(--text-primary); border-color: var(--text-primary); color: #fff; }
+    .flt-btn:hover { background: var(--bg); color: var(--text-primary); }
+    /* 단일 선택 활성 (기간 · 정렬 · 유형) */
+    .flt-btn.active { background: var(--text-primary); color: #fff; }
     /* 등급 다중 선택 활성 */
-    .flt-btn.active-excellent { background: var(--grade-excellent); border-color: var(--grade-excellent); color: #fff; }
-    .flt-btn.active-great     { background: var(--grade-great);     border-color: var(--grade-great);     color: #fff; }
-    .flt-btn.active-good      { background: var(--grade-good);      border-color: var(--grade-good);      color: #fff; }
-    .flt-btn.active-soso      { background: var(--grade-soso);      border-color: var(--grade-soso);      color: #fff; }
-    .flt-btn.active-bad       { background: var(--grade-bad);       border-color: var(--grade-bad);       color: #fff; }
+    .flt-btn.active-excellent { background: var(--grade-excellent); color: #fff; }
+    .flt-btn.active-great     { background: var(--grade-great);     color: #fff; }
+    .flt-btn.active-good      { background: var(--grade-good);      color: #fff; }
+    .flt-btn.active-soso      { background: var(--grade-soso);      color: #fff; }
+    .flt-btn.active-bad       { background: var(--grade-bad);       color: #fff; }
 
     /* 반응형 */
     @media (max-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
@@ -653,27 +675,47 @@
         <div class="filter-group">
           <span class="filter-label">
             기여도
-            <span class="metric-info">?<span class="tip">채널 평균 조회수 대비 이 영상의 조회수 비율. 채널 내에서 얼마나 두드러지는지 나타냅니다.</span></span>
+            <span class="metric-info">?<span class="tip">
+              <div class="tip-formula">영상 조회수 ÷ 채널 평균 조회수</div>
+              채널에서 이 영상이 얼마나 두드러지는지를 나타냅니다.
+              <div class="tip-grades" style="margin-top:7px;">
+                <div class="tip-grade-row"><span>★★★★★</span><span>5배 이상 · 압도적 대표작</span></div>
+                <div class="tip-grade-row"><span>★★★★</span><span>2배 이상 · 채널 내 히트작</span></div>
+                <div class="tip-grade-row"><span>★★★</span><span>1배 이상 · 평균 수준</span></div>
+                <div class="tip-grade-row"><span>★★</span><span>0.5배 이상 · 평균 이하</span></div>
+                <div class="tip-grade-row"><span>★</span><span>0.5배 미만 · 저조</span></div>
+              </div>
+            </span></span>
           </span>
           <div class="filter-btns">
-            <button class="flt-btn" data-type="contribution" data-grade="excellent" onclick="toggleGradeFilter(this)">Excellent</button>
-            <button class="flt-btn" data-type="contribution" data-grade="great"     onclick="toggleGradeFilter(this)">Great</button>
-            <button class="flt-btn" data-type="contribution" data-grade="good"      onclick="toggleGradeFilter(this)">Good</button>
-            <button class="flt-btn" data-type="contribution" data-grade="soso"      onclick="toggleGradeFilter(this)">Soso</button>
-            <button class="flt-btn" data-type="contribution" data-grade="bad"       onclick="toggleGradeFilter(this)">Bad</button>
+            <button class="flt-btn" data-type="contribution" data-grade="excellent" onclick="toggleGradeFilter(this)">★★★★★</button>
+            <button class="flt-btn" data-type="contribution" data-grade="great"     onclick="toggleGradeFilter(this)">★★★★</button>
+            <button class="flt-btn" data-type="contribution" data-grade="good"      onclick="toggleGradeFilter(this)">★★★</button>
+            <button class="flt-btn" data-type="contribution" data-grade="soso"      onclick="toggleGradeFilter(this)">★★</button>
+            <button class="flt-btn" data-type="contribution" data-grade="bad"       onclick="toggleGradeFilter(this)">★</button>
           </div>
         </div>
         <div class="filter-group">
           <span class="filter-label">
             성과도
-            <span class="metric-info">?<span class="tip">구독자 수 대비 이 영상의 조회수 비율. 알고리즘 추천 강도를 나타냅니다.</span></span>
+            <span class="metric-info">?<span class="tip">
+              <div class="tip-formula">영상 조회수 ÷ 채널 구독자 수</div>
+              구독자 이외에 얼마나 퍼졌는지, 알고리즘 추천 강도를 나타냅니다.
+              <div class="tip-grades" style="margin-top:7px;">
+                <div class="tip-grade-row"><span>★★★★★</span><span>10배 이상 · 강력한 바이럴</span></div>
+                <div class="tip-grade-row"><span>★★★★</span><span>3배 이상 · 알고리즘 추천</span></div>
+                <div class="tip-grade-row"><span>★★★</span><span>1배 이상 · 구독자 범위</span></div>
+                <div class="tip-grade-row"><span>★★</span><span>0.5배 이상 · 구독자도 덜 봄</span></div>
+                <div class="tip-grade-row"><span>★</span><span>0.5배 미만 · 거의 미노출</span></div>
+              </div>
+            </span></span>
           </span>
           <div class="filter-btns">
-            <button class="flt-btn" data-type="performance" data-grade="excellent" onclick="toggleGradeFilter(this)">Excellent</button>
-            <button class="flt-btn" data-type="performance" data-grade="great"     onclick="toggleGradeFilter(this)">Great</button>
-            <button class="flt-btn" data-type="performance" data-grade="good"      onclick="toggleGradeFilter(this)">Good</button>
-            <button class="flt-btn" data-type="performance" data-grade="soso"      onclick="toggleGradeFilter(this)">Soso</button>
-            <button class="flt-btn" data-type="performance" data-grade="bad"       onclick="toggleGradeFilter(this)">Bad</button>
+            <button class="flt-btn" data-type="performance" data-grade="excellent" onclick="toggleGradeFilter(this)">★★★★★</button>
+            <button class="flt-btn" data-type="performance" data-grade="great"     onclick="toggleGradeFilter(this)">★★★★</button>
+            <button class="flt-btn" data-type="performance" data-grade="good"      onclick="toggleGradeFilter(this)">★★★</button>
+            <button class="flt-btn" data-type="performance" data-grade="soso"      onclick="toggleGradeFilter(this)">★★</button>
+            <button class="flt-btn" data-type="performance" data-grade="bad"       onclick="toggleGradeFilter(this)">★</button>
           </div>
         </div>
       </div>
@@ -703,8 +745,8 @@
           <span class="filter-label">유형</span>
           <div class="filter-btns">
             <button class="flt-btn active" data-ctype=""       onclick="setContentTypeFilter(this)">전체</button>
-            <button class="flt-btn"        data-ctype="shorts" onclick="setContentTypeFilter(this)">숏폼 ≤60s</button>
-            <button class="flt-btn"        data-ctype="normal" onclick="setContentTypeFilter(this)">일반영상</button>
+            <button class="flt-btn"        data-ctype="shorts" onclick="setContentTypeFilter(this)">숏폼 ≤3분</button>
+            <button class="flt-btn"        data-ctype="normal" onclick="setContentTypeFilter(this)">롱폼</button>
           </div>
         </div>
       </div>
@@ -872,21 +914,28 @@ function calculateMetrics(video, channel) {
 }
 
 function gradePerformance(r) {
-  if (r === null) return { label: 'N/A', cls: 'na' };
-  if (r >= 10)  return { label: 'Excellent', cls: 'excellent' };
-  if (r >= 3)   return { label: 'Great',     cls: 'great' };
-  if (r >= 1)   return { label: 'Good',      cls: 'good' };
-  if (r >= 0.5) return { label: 'Soso',      cls: 'soso' };
-  return { label: 'Bad', cls: 'bad' };
+  if (r === null) return { label: 'N/A', stars: 0, cls: 'na' };
+  if (r >= 10)  return { label: 'Excellent', stars: 5, cls: 'excellent' };
+  if (r >= 3)   return { label: 'Great',     stars: 4, cls: 'great' };
+  if (r >= 1)   return { label: 'Good',      stars: 3, cls: 'good' };
+  if (r >= 0.5) return { label: 'Soso',      stars: 2, cls: 'soso' };
+  return { label: 'Bad', stars: 1, cls: 'bad' };
 }
 
 function gradeContribution(r) {
-  if (r === null) return { label: 'N/A', cls: 'na' };
-  if (r >= 5)   return { label: 'Excellent', cls: 'excellent' };
-  if (r >= 2)   return { label: 'Great',     cls: 'great' };
-  if (r >= 1)   return { label: 'Good',      cls: 'good' };
-  if (r >= 0.5) return { label: 'Soso',      cls: 'soso' };
-  return { label: 'Bad', cls: 'bad' };
+  if (r === null) return { label: 'N/A', stars: 0, cls: 'na' };
+  if (r >= 5)   return { label: 'Excellent', stars: 5, cls: 'excellent' };
+  if (r >= 2)   return { label: 'Great',     stars: 4, cls: 'great' };
+  if (r >= 1)   return { label: 'Good',      stars: 3, cls: 'good' };
+  if (r >= 0.5) return { label: 'Soso',      stars: 2, cls: 'soso' };
+  return { label: 'Bad', stars: 1, cls: 'bad' };
+}
+
+function starsHtml(grade) {
+  if (grade.stars === 0) return `<span class="grade-stars na">N/A</span>`;
+  const filled = '★'.repeat(grade.stars);
+  const empty  = '☆'.repeat(5 - grade.stars);
+  return `<span class="grade-stars ${grade.cls}">${filled}<span class="grade-stars-empty">${empty}</span></span>`;
 }
 
 /* ===================================================
@@ -953,6 +1002,8 @@ function buildCard({ video, channel, performanceRatio, contributionRatio, savedA
   const pg = gradePerformance(performanceRatio);
   const cg = gradeContribution(contributionRatio);
   const bm = isBookmarked(vid);
+  const contriDesc = contributionRatio !== null ? `채널 평균의 ${contributionRatio.toFixed(1)}배` : '';
+  const perfDesc   = performanceRatio  !== null ? `구독자의 ${performanceRatio.toFixed(1)}배` : '';
 
   let chThumbHtml;
   const chThumbSrc = cSn.thumbnails?.default?.url;
@@ -990,13 +1041,15 @@ function buildCard({ video, channel, performanceRatio, contributionRatio, savedA
       <div class="metrics">
         <div class="metric">
           <div class="metric-label">기여도</div>
-          <span class="metric-grade ${cg.cls}">${cg.label}</span>
+          ${starsHtml(cg)}
           <div class="metric-value">${esc(fmtRatio(contributionRatio))}</div>
+          ${contriDesc ? `<div class="metric-desc">${contriDesc}</div>` : ''}
         </div>
         <div class="metric">
           <div class="metric-label">성과도</div>
-          <span class="metric-grade ${pg.cls}">${pg.label}</span>
+          ${starsHtml(pg)}
           <div class="metric-value">${esc(fmtRatio(performanceRatio))}</div>
+          ${perfDesc ? `<div class="metric-desc">${perfDesc}</div>` : ''}
         </div>
       </div>
       ${savedAt ? `<div class="bookmark-saved-at">저장: ${esc(fmtDate(savedAt))}</div>` : ''}
@@ -1122,7 +1175,7 @@ function passesFilters(item) {
   if (filterState.contentType) {
     const secs = getDurationSeconds(item.video.contentDetails?.duration);
     if (secs === null) return filterState.contentType === 'normal';
-    if (filterState.contentType === 'shorts' ? secs > 60 : secs <= 60) return false;
+    if (filterState.contentType === 'shorts' ? secs > 180 : secs <= 180) return false;
   }
   return true;
 }
@@ -1232,7 +1285,7 @@ function applyFilters() {
     result = result.filter(item => {
       const secs = getDurationSeconds(item.video.contentDetails?.duration);
       if (secs === null) return filterState.contentType === 'normal';
-      return filterState.contentType === 'shorts' ? secs <= 60 : secs > 60;
+      return filterState.contentType === 'shorts' ? secs <= 180 : secs > 180;
     });
   }
 
