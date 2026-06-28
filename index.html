@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube 레퍼런스 수집기</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAFAF8;
+      --card-bg: #FFFFFF;
+      --text-primary: #1A1A1A;
+      --text-secondary: #6B6B6B;
+      --text-tertiary: #9CA3AF;
+      --border: #E5E5E0;
+      --accent: #3730A3;
+      --accent-hover: #312E81;
+      --grade-excellent: #166534;
+      --grade-great: #16A34A;
+      --grade-good: #65A30D;
+      --grade-soso: #CA8A04;
+      --grade-bad: #6B7280;
+      --font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-modal: 0 20px 60px rgba(0,0,0,0.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* 헤더 */
+    .header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .logo {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      letter-spacing: -0.3px;
+    }
+    .tabs {
+      display: flex;
+      gap: 2px;
+      background: #F3F4F6;
+      border-radius: var(--radius-sm);
+      padding: 3px;
+    }
+    .tab-btn {
+      padding: 5px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 4px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: var(--text-primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .header-spacer { flex: 1; }
+    .settings-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .settings-btn:hover { background: var(--bg); color: var(--text-primary); }
+
+    /* 컨테이너 */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* 검색 폼 */
+    .search-form {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .search-input-wrap { flex: 1; min-width: 200px; }
+    .search-input {
+      width: 100%;
+      height: 40px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card-bg);
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--text-tertiary); }
+    .form-select {
+      height: 40px;
+      padding: 0 30px 0 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%239CA3AF' d='M5 7L0 2h10z'/%3E%3C/svg%3E") no-repeat right 10px center;
+      appearance: none;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-select:focus { border-color: var(--accent); }
+    .search-btn {
+      height: 40px;
+      padding: 0 20px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .search-btn:hover:not(:disabled) { background: var(--accent-hover); }
+    .search-btn:disabled { background: var(--text-tertiary); cursor: not-allowed; }
+
+    /* 결과 정보 바 */
+    .results-info {
+      display: none;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .results-info.visible { display: flex; }
+    .results-count { font-weight: 600; color: var(--text-primary); }
+    .quota-display { font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary); }
+    .quota-warn { color: #DC2626; font-weight: 600; }
+
+    /* 그리드 */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    /* 카드 */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: transform 0.15s, box-shadow 0.15s;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.09); }
+
+    /* 썸네일 */
+    .card-thumb {
+      position: relative;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      cursor: pointer;
+      background: #F3F4F6;
+      flex-shrink: 0;
+    }
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s;
+    }
+    .card-thumb:hover img { transform: scale(1.04); }
+    .duration-badge {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: rgba(0,0,0,0.82);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    /* 카드 바디 */
+    .card-body { padding: 12px; flex: 1; }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 6px;
+      text-decoration: none;
+      display: block;
+    }
+    .card-title:hover { color: var(--accent); }
+    .card-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 0;
+    }
+    .card-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 10px 0;
+    }
+
+    /* 채널 */
+    .channel-info { display: flex; align-items: center; gap: 8px; }
+    .channel-thumb {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #E5E7EB;
+    }
+    .channel-thumb-placeholder {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #7C3AED);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .channel-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 160px;
+    }
+    .channel-stats { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); }
+
+    /* 메트릭 */
+    .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .metric { background: var(--bg); border-radius: var(--radius-sm); padding: 8px; }
+    .metric-label { font-size: 10px; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 500; }
+    .metric-grade {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+    .metric-grade.excellent { background: var(--grade-excellent); }
+    .metric-grade.great { background: var(--grade-great); }
+    .metric-grade.good { background: var(--grade-good); }
+    .metric-grade.soso { background: var(--grade-soso); }
+    .metric-grade.bad { background: var(--grade-bad); }
+    .metric-grade.na { background: #E5E7EB; color: var(--text-secondary); }
+    .metric-value { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+
+    /* 카드 푸터 */
+    .card-footer {
+      display: flex;
+      justify-content: flex-end;
+      padding: 6px 10px 8px;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+    .bookmark-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      color: var(--text-tertiary);
+      font-size: 18px;
+      line-height: 1;
+      transition: all 0.15s;
+    }
+    .bookmark-btn:hover { background: var(--bg); color: var(--accent); }
+    .bookmark-btn.bookmarked { color: #F59E0B; }
+
+    .bookmark-saved-at {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-tertiary);
+      margin-top: 8px;
+    }
+
+    /* 상태 뷰 */
+    .state-view {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 12px;
+      text-align: center;
+    }
+    .state-icon { font-size: 48px; line-height: 1; opacity: 0.35; }
+    .state-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .state-desc { font-size: 13px; color: var(--text-secondary); max-width: 360px; line-height: 1.6; }
+
+    /* 스피너 */
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* 탭 패널 */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* 모달 */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      width: 100%;
+      max-width: 440px;
+      margin: 24px;
+    }
+    .modal-header {
+      padding: 20px 24px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; }
+    .modal-close {
+      width: 30px;
+      height: 30px;
+      border: none;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      font-size: 18px;
+      line-height: 1;
+    }
+    .modal-close:hover { background: var(--border); }
+    .modal-body { padding: 16px 24px 4px; }
+    .modal-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 16px; }
+    .modal-desc a { color: var(--accent); text-decoration: none; }
+    .modal-desc a:hover { text-decoration: underline; }
+    .modal-label { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block; }
+    .modal-input {
+      width: 100%;
+      height: 42px;
+      padding: 0 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .modal-input:focus { border-color: var(--accent); }
+    .modal-input.err { border-color: #DC2626; }
+    .modal-err { font-size: 12px; color: #DC2626; margin-top: 6px; display: none; }
+    .modal-err.visible { display: block; }
+    .modal-footer {
+      padding: 16px 24px 20px;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .btn { height: 38px; padding: 0 16px; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
+    .btn-ghost:hover { background: var(--bg); }
+    .btn-primary { background: var(--accent); color: #fff; font-weight: 600; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger { background: #DC2626; color: #fff; font-weight: 600; }
+    .btn-danger:hover { background: #B91C1C; }
+
+    /* 필터 바 */
+    .filter-bar {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: -20px; /* results-info margin-bottom 흡수 */
+      padding: 10px 0 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .filter-bar.visible { display: flex; }
+    .filter-row { display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+    .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .filter-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      min-width: 30px;
+      line-height: 28px;
+    }
+    .filter-btns { display: flex; gap: 5px; flex-wrap: wrap; }
+    .flt-btn {
+      height: 28px;
+      padding: 0 11px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: transparent;
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .flt-btn:hover { border-color: var(--text-tertiary); color: var(--text-primary); }
+    /* 단일 선택 활성 (기간 · 정렬) */
+    .flt-btn.active { background: var(--text-primary); border-color: var(--text-primary); color: #fff; }
+    /* 등급 다중 선택 활성 */
+    .flt-btn.active-excellent { background: var(--grade-excellent); border-color: var(--grade-excellent); color: #fff; }
+    .flt-btn.active-great     { background: var(--grade-great);     border-color: var(--grade-great);     color: #fff; }
+    .flt-btn.active-good      { background: var(--grade-good);      border-color: var(--grade-good);      color: #fff; }
+    .flt-btn.active-soso      { background: var(--grade-soso);      border-color: var(--grade-soso);      color: #fff; }
+    .flt-btn.active-bad       { background: var(--grade-bad);       border-color: var(--grade-bad);       color: #fff; }
+
+    /* 반응형 */
+    @media (max-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .header-inner { padding: 0 16px; gap: 12px; }
+      .container { padding: 16px; }
+      .logo { font-size: 13px; }
+    }
+    @media (max-width: 520px) {
+      .grid { grid-template-columns: 1fr; }
+      .search-input-wrap { min-width: 100%; order: -1; flex: unset; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- API 키 모달 -->
+<div class="modal-overlay hidden" id="apiKeyModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">YouTube API 키 설정</span>
+      <button class="modal-close" id="modalCloseBtn" aria-label="닫기">×</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc">
+        YouTube Data API v3 키를 입력하세요.<br>
+        Google Cloud Console에서 발급받을 수 있습니다.<br><br>
+        <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">↗ Google Cloud Console에서 API 키 발급받기</a>
+      </p>
+      <label class="modal-label" for="apiKeyInput">API 키</label>
+      <input class="modal-input" type="text" id="apiKeyInput" placeholder="AIza..." autocomplete="off" spellcheck="false">
+      <div class="modal-err" id="apiKeyErr"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="removeKeyBtn" style="display:none; margin-right:auto;">키 제거</button>
+      <button class="btn btn-ghost" id="modalCancelBtn">취소</button>
+      <button class="btn btn-primary" id="saveKeyBtn">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 헤더 -->
+<header class="header">
+  <div class="header-inner">
+    <span class="logo">YouTube 레퍼런스 수집기</span>
+    <div class="tabs">
+      <button class="tab-btn active" id="tabSearch" onclick="switchTab('search')">검색</button>
+      <button class="tab-btn" id="tabBookmark" onclick="switchTab('bookmark')">북마크</button>
+    </div>
+    <div class="header-spacer"></div>
+    <button class="settings-btn" onclick="showApiKeyModal(false)" title="API 키 설정">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- 메인 -->
+<main class="container">
+  <!-- 검색 탭 -->
+  <div class="tab-panel active" id="panelSearch">
+    <form class="search-form" id="searchForm" onsubmit="handleSearch(event)">
+      <div class="search-input-wrap">
+        <input class="search-input" type="text" id="keywordInput" placeholder="검색어를 입력하세요...">
+      </div>
+      <select class="form-select" id="sortSelect">
+        <option value="relevance">관련성</option>
+        <option value="date">최신순</option>
+        <option value="viewCount">조회수순</option>
+      </select>
+      <select class="form-select" id="countSelect">
+        <option value="10">10개</option>
+        <option value="20" selected>20개</option>
+        <option value="50">50개</option>
+      </select>
+      <select class="form-select" id="periodSelect">
+        <option value="">전체</option>
+        <option value="week">최근 1주</option>
+        <option value="month">1개월</option>
+        <option value="6months">6개월</option>
+        <option value="year">1년</option>
+      </select>
+      <button class="search-btn" type="submit" id="searchBtn">검색</button>
+    </form>
+    <div class="results-info" id="resultsInfo">
+      <span class="results-count" id="resultsCount"></span>
+      <span class="quota-display" id="quotaDisplay"></span>
+    </div>
+
+    <!-- 필터 바 (검색 결과가 있을 때만 표시) -->
+    <div class="filter-bar" id="filterBar">
+      <div class="filter-row">
+        <div class="filter-group">
+          <span class="filter-label">기여도</span>
+          <div class="filter-btns">
+            <button class="flt-btn" data-type="contribution" data-grade="excellent" onclick="toggleGradeFilter(this)">Excellent</button>
+            <button class="flt-btn" data-type="contribution" data-grade="great"     onclick="toggleGradeFilter(this)">Great</button>
+            <button class="flt-btn" data-type="contribution" data-grade="good"      onclick="toggleGradeFilter(this)">Good</button>
+            <button class="flt-btn" data-type="contribution" data-grade="soso"      onclick="toggleGradeFilter(this)">Soso</button>
+            <button class="flt-btn" data-type="contribution" data-grade="bad"       onclick="toggleGradeFilter(this)">Bad</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">성과도</span>
+          <div class="filter-btns">
+            <button class="flt-btn" data-type="performance" data-grade="excellent" onclick="toggleGradeFilter(this)">Excellent</button>
+            <button class="flt-btn" data-type="performance" data-grade="great"     onclick="toggleGradeFilter(this)">Great</button>
+            <button class="flt-btn" data-type="performance" data-grade="good"      onclick="toggleGradeFilter(this)">Good</button>
+            <button class="flt-btn" data-type="performance" data-grade="soso"      onclick="toggleGradeFilter(this)">Soso</button>
+            <button class="flt-btn" data-type="performance" data-grade="bad"       onclick="toggleGradeFilter(this)">Bad</button>
+          </div>
+        </div>
+      </div>
+      <div class="filter-row">
+        <div class="filter-group">
+          <span class="filter-label">게시일</span>
+          <div class="filter-btns">
+            <button class="flt-btn active" data-period=""        onclick="setPeriodFilter(this)">전체</button>
+            <button class="flt-btn"        data-period="week"    onclick="setPeriodFilter(this)">1주일</button>
+            <button class="flt-btn"        data-period="month"   onclick="setPeriodFilter(this)">1개월</button>
+            <button class="flt-btn"        data-period="3months" onclick="setPeriodFilter(this)">3개월</button>
+            <button class="flt-btn"        data-period="6months" onclick="setPeriodFilter(this)">6개월</button>
+            <button class="flt-btn"        data-period="year"    onclick="setPeriodFilter(this)">1년</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">정렬</span>
+          <div class="filter-btns">
+            <button class="flt-btn active" data-sort="relevance"    onclick="setSortFilter(this)">관련성</button>
+            <button class="flt-btn"        data-sort="viewCount"    onclick="setSortFilter(this)">조회수</button>
+            <button class="flt-btn"        data-sort="contribution" onclick="setSortFilter(this)">기여도</button>
+            <button class="flt-btn"        data-sort="performance"  onclick="setSortFilter(this)">성과도</button>
+            <button class="flt-btn"        data-sort="date"         onclick="setSortFilter(this)">최신순</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="searchOutput">
+      <div class="state-view">
+        <div class="state-icon">🎬</div>
+        <div class="state-title">YouTube 레퍼런스 수집기</div>
+        <div class="state-desc">검색어를 입력하고 검색 버튼을 눌러보세요.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 북마크 탭 -->
+  <div class="tab-panel" id="panelBookmark">
+    <div id="bookmarkOutput"></div>
+  </div>
+</main>
+
+<script>
+/* ===================================================
+   상수
+=================================================== */
+const KEY_API     = 'youtube_api_key';
+const KEY_BM      = 'youtube_bookmarks';
+const KEY_QUOTA   = 'youtube_quota_used';
+const KEY_QDATE   = 'youtube_quota_date';
+const QUOTA_LIMIT = 10000;
+
+/* ===================================================
+   API 키 관리
+=================================================== */
+function getApiKey() { return localStorage.getItem(KEY_API) || ''; }
+function setApiKey(k) { k ? localStorage.setItem(KEY_API, k) : localStorage.removeItem(KEY_API); }
+
+function showApiKeyModal(forceNoClose = true) {
+  const key = getApiKey();
+  document.getElementById('apiKeyInput').value = key;
+  document.getElementById('apiKeyInput').classList.remove('err');
+  document.getElementById('apiKeyErr').classList.remove('visible');
+  document.getElementById('removeKeyBtn').style.display = key ? 'inline-flex' : 'none';
+  // 키가 없는 첫 실행이면 취소 버튼 숨김
+  document.getElementById('modalCancelBtn').style.display = (forceNoClose && !key) ? 'none' : 'inline-flex';
+  document.getElementById('apiKeyModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('apiKeyInput').focus(), 80);
+}
+
+function hideApiKeyModal() {
+  document.getElementById('apiKeyModal').classList.add('hidden');
+}
+
+/* ===================================================
+   할당량
+=================================================== */
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+function resetQuotaIfNewDay() {
+  if (localStorage.getItem(KEY_QDATE) !== todayStr()) {
+    localStorage.setItem(KEY_QUOTA, '0');
+    localStorage.setItem(KEY_QDATE, todayStr());
+  }
+}
+
+function getQuotaUsed() {
+  resetQuotaIfNewDay();
+  return parseInt(localStorage.getItem(KEY_QUOTA) || '0', 10);
+}
+
+function addQuotaUsage(n) {
+  resetQuotaIfNewDay();
+  localStorage.setItem(KEY_QUOTA, String(getQuotaUsed() + n));
+  renderQuota();
+  syncSearchBtn();
+}
+
+function renderQuota() {
+  const used = getQuotaUsed();
+  const el = document.getElementById('quotaDisplay');
+  if (!el) return;
+  const warn = used > QUOTA_LIMIT * 0.8;
+  el.innerHTML = `할당량 <span class="${warn ? 'quota-warn' : ''}">${used.toLocaleString()}</span>/${QUOTA_LIMIT.toLocaleString()}`;
+}
+
+function syncSearchBtn() {
+  const btn = document.getElementById('searchBtn');
+  if (!btn) return;
+  const over = getQuotaUsed() >= QUOTA_LIMIT;
+  btn.disabled = over;
+  btn.title = over ? '오늘의 API 할당량을 초과했습니다.' : '';
+}
+
+/* ===================================================
+   API 호출
+=================================================== */
+function periodToISO(p) {
+  if (!p) return null;
+  const d = new Date();
+  if (p === 'week')    d.setDate(d.getDate() - 7);
+  if (p === 'month')   d.setMonth(d.getMonth() - 1);
+  if (p === '6months') d.setMonth(d.getMonth() - 6);
+  if (p === 'year')    d.setFullYear(d.getFullYear() - 1);
+  return d.toISOString();
+}
+
+async function apiGet(url, params) {
+  params.key = getApiKey();
+  const res = await fetch(`${url}?${new URLSearchParams(params)}`);
+  if (!res.ok) {
+    let body = {};
+    try { body = await res.json(); } catch {}
+    const reason = body?.error?.errors?.[0]?.reason || '';
+    if (res.status === 401 || reason === 'keyInvalid') throw Object.assign(new Error('INVALID_KEY'), { code: 'INVALID_KEY' });
+    if (reason === 'quotaExceeded') throw Object.assign(new Error('QUOTA_EXCEEDED'), { code: 'QUOTA_EXCEEDED' });
+    throw Object.assign(new Error(`HTTP_${res.status}`), { code: `HTTP_${res.status}` });
+  }
+  return res.json();
+}
+
+async function searchVideos(keyword, { order, maxResults, period }) {
+  const p = { part: 'snippet', q: keyword, type: 'video', maxResults, order };
+  const after = periodToISO(period);
+  if (after) p.publishedAfter = after;
+  return apiGet('https://www.googleapis.com/youtube/v3/search', p);
+}
+
+async function fetchVideoDetails(ids) {
+  return apiGet('https://www.googleapis.com/youtube/v3/videos', {
+    part: 'statistics,snippet,contentDetails',
+    id: ids.join(','),
+  });
+}
+
+async function fetchChannelDetails(ids) {
+  return apiGet('https://www.googleapis.com/youtube/v3/channels', {
+    part: 'statistics,snippet',
+    id: ids.join(','),
+  });
+}
+
+/* ===================================================
+   데이터 가공
+=================================================== */
+function mergeData(videoResp, channelResp) {
+  const chMap = {};
+  (channelResp.items || []).forEach(c => { chMap[c.id] = c; });
+  return (videoResp.items || []).map(v => ({
+    video: v,
+    channel: chMap[v.snippet.channelId] || null,
+  }));
+}
+
+function calculateMetrics(video, channel) {
+  const views   = parseInt(video.statistics?.viewCount || '0', 10);
+  const subs    = channel ? parseInt(channel.statistics?.subscriberCount || '0', 10) : 0;
+  const chViews = channel ? parseInt(channel.statistics?.viewCount || '0', 10) : 0;
+  const chVids  = channel ? parseInt(channel.statistics?.videoCount || '0', 10) : 0;
+
+  const performanceRatio  = subs > 0 ? views / subs : null;
+  const avgViews          = chVids > 0 ? chViews / chVids : 0;
+  const contributionRatio = avgViews > 0 ? views / avgViews : null;
+
+  return { performanceRatio, contributionRatio };
+}
+
+function gradePerformance(r) {
+  if (r === null) return { label: 'N/A', cls: 'na' };
+  if (r >= 10)  return { label: 'Excellent', cls: 'excellent' };
+  if (r >= 3)   return { label: 'Great',     cls: 'great' };
+  if (r >= 1)   return { label: 'Good',      cls: 'good' };
+  if (r >= 0.5) return { label: 'Soso',      cls: 'soso' };
+  return { label: 'Bad', cls: 'bad' };
+}
+
+function gradeContribution(r) {
+  if (r === null) return { label: 'N/A', cls: 'na' };
+  if (r >= 5)   return { label: 'Excellent', cls: 'excellent' };
+  if (r >= 2)   return { label: 'Great',     cls: 'great' };
+  if (r >= 1)   return { label: 'Good',      cls: 'good' };
+  if (r >= 0.5) return { label: 'Soso',      cls: 'soso' };
+  return { label: 'Bad', cls: 'bad' };
+}
+
+/* ===================================================
+   포맷터
+=================================================== */
+function fmtNum(n) {
+  if (n === null || n === undefined) return 'N/A';
+  const v = parseInt(n, 10);
+  if (isNaN(v)) return 'N/A';
+  if (v >= 100000000) return (v / 100000000).toFixed(1) + '억';
+  if (v >= 10000)     return (v / 10000).toFixed(1) + '만';
+  return v.toLocaleString('ko-KR');
+}
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function fmtDuration(iso) {
+  if (!iso) return '';
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return '';
+  const h = parseInt(m[1]||'0',10), mn = parseInt(m[2]||'0',10), s = parseInt(m[3]||'0',10);
+  if (h > 0) return `${h}:${String(mn).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${String(mn).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function fmtRatio(r) {
+  return r === null ? 'N/A' : r.toFixed(1) + 'x';
+}
+
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* ===================================================
+   렌더링
+=================================================== */
+// 검색 결과 아이템 저장
+let _allItems = []; // 전체 결과 (필터링 전)
+let _items    = []; // 북마크 참조용 (= _allItems)
+
+function buildCard({ video, channel, performanceRatio, contributionRatio, savedAt, isBookmarkView }) {
+  const sn    = video.snippet || {};
+  const stats = video.statistics || {};
+  const cd    = video.contentDetails || {};
+  const cSn   = channel?.snippet || {};
+  const cSt   = channel?.statistics || {};
+
+  const vid    = video.id?.videoId || video.id || '';
+  const title  = sn.title || '';
+  const thumb  = sn.thumbnails?.medium?.url || sn.thumbnails?.default?.url || '';
+  const dur    = cd.duration || '';
+  const chName = sn.channelTitle || '';
+
+  const pg = gradePerformance(performanceRatio);
+  const cg = gradeContribution(contributionRatio);
+  const bm = isBookmarked(vid);
+
+  let chThumbHtml;
+  const chThumbSrc = cSn.thumbnails?.default?.url;
+  if (chThumbSrc) {
+    chThumbHtml = `<img class="channel-thumb" src="${esc(chThumbSrc)}" alt="${esc(chName)}" loading="lazy" onerror="this.replaceWith(makePlaceholder('${esc(chName)}'))">`;
+  } else {
+    chThumbHtml = `<div class="channel-thumb-placeholder">${esc(chName.charAt(0)||'?')}</div>`;
+  }
+
+  const bmOnclick = isBookmarkView
+    ? `removeBookmarkCard('${vid}', this)`
+    : `toggleBookmark('${vid}', this)`;
+
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.dataset.vid = vid;
+
+  el.innerHTML = `
+    <div class="card-thumb" onclick="window.open('https://www.youtube.com/watch?v=${esc(vid)}','_blank')" role="link" tabindex="0" aria-label="${esc(title)}">
+      <img src="${esc(thumb)}" alt="" loading="lazy">
+      ${dur ? `<span class="duration-badge">${esc(fmtDuration(dur))}</span>` : ''}
+    </div>
+    <div class="card-body">
+      <a class="card-title" href="https://www.youtube.com/watch?v=${esc(vid)}" target="_blank" rel="noopener">${esc(title)}</a>
+      <div class="card-meta">${esc(fmtNum(stats.viewCount))} 회 · ${esc(fmtDate(sn.publishedAt))}</div>
+      <hr class="card-divider">
+      <div class="channel-info">
+        ${chThumbHtml}
+        <div>
+          <div class="channel-name">${esc(chName)}</div>
+          <div class="channel-stats">${esc(fmtNum(cSt.subscriberCount))}명 · ${esc(fmtNum(cSt.videoCount))}개</div>
+        </div>
+      </div>
+      <hr class="card-divider">
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">기여도</div>
+          <span class="metric-grade ${cg.cls}">${cg.label}</span>
+          <div class="metric-value">${esc(fmtRatio(contributionRatio))}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">성과도</div>
+          <span class="metric-grade ${pg.cls}">${pg.label}</span>
+          <div class="metric-value">${esc(fmtRatio(performanceRatio))}</div>
+        </div>
+      </div>
+      ${savedAt ? `<div class="bookmark-saved-at">저장: ${esc(fmtDate(savedAt))}</div>` : ''}
+    </div>
+    <div class="card-footer">
+      <button class="bookmark-btn ${bm||isBookmarkView ? 'bookmarked' : ''}"
+              onclick="${bmOnclick}"
+              title="${bm||isBookmarkView ? '북마크 해제' : '북마크 저장'}">
+        ${bm||isBookmarkView ? '★' : '☆'}
+      </button>
+    </div>
+  `;
+  return el;
+}
+
+function makePlaceholder(name) {
+  const d = document.createElement('div');
+  d.className = 'channel-thumb-placeholder';
+  d.textContent = name.charAt(0) || '?';
+  return d;
+}
+window.makePlaceholder = makePlaceholder;
+
+function showState(container, icon, title, desc) {
+  container.innerHTML = `
+    <div class="state-view">
+      <div class="state-icon">${icon}</div>
+      <div class="state-title">${esc(title)}</div>
+      <div class="state-desc">${esc(desc)}</div>
+    </div>`;
+}
+
+function showLoading(container) {
+  container.innerHTML = `<div class="state-view"><div class="spinner"></div><div style="color:var(--text-secondary);font-size:14px;">검색 중...</div></div>`;
+}
+
+/* ===================================================
+   필터 / 정렬
+=================================================== */
+const filterState = {
+  contribution: new Set(), // 선택된 기여도 등급
+  performance:  new Set(), // 선택된 성과도 등급
+  period: '',              // '' | 'week' | 'month' | '3months' | '6months' | 'year'
+  sort:   'relevance',     // 'relevance' | 'viewCount' | 'contribution' | 'performance' | 'date'
+};
+
+function toggleGradeFilter(btn) {
+  const type  = btn.dataset.type;
+  const grade = btn.dataset.grade;
+  const set   = filterState[type];
+  if (set.has(grade)) {
+    set.delete(grade);
+    btn.className = 'flt-btn';
+  } else {
+    set.add(grade);
+    btn.className = `flt-btn active-${grade}`;
+  }
+  applyFilters();
+}
+
+function setPeriodFilter(btn) {
+  filterState.period = btn.dataset.period;
+  document.querySelectorAll('#filterBar [data-period]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function setSortFilter(btn) {
+  filterState.sort = btn.dataset.sort;
+  document.querySelectorAll('#filterBar [data-sort]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function resetFilters() {
+  filterState.contribution.clear();
+  filterState.performance.clear();
+  filterState.period = '';
+  filterState.sort   = 'relevance';
+  document.querySelectorAll('.flt-btn[data-grade]').forEach(b => { b.className = 'flt-btn'; });
+  document.querySelectorAll('#filterBar [data-period]').forEach(b => b.classList.toggle('active', b.dataset.period === ''));
+  document.querySelectorAll('#filterBar [data-sort]').forEach(b => b.classList.toggle('active', b.dataset.sort === 'relevance'));
+}
+
+function periodCutoff(p) {
+  if (!p) return null;
+  const d = new Date();
+  if (p === 'week')    d.setDate(d.getDate() - 7);
+  if (p === 'month')   d.setMonth(d.getMonth() - 1);
+  if (p === '3months') d.setMonth(d.getMonth() - 3);
+  if (p === '6months') d.setMonth(d.getMonth() - 6);
+  if (p === 'year')    d.setFullYear(d.getFullYear() - 1);
+  return d;
+}
+
+function applyFilters() {
+  const out = document.getElementById('searchOutput');
+  let result = [..._allItems];
+
+  // 기여도 필터
+  if (filterState.contribution.size > 0) {
+    result = result.filter(item => filterState.contribution.has(gradeContribution(item.contributionRatio).cls));
+  }
+
+  // 성과도 필터
+  if (filterState.performance.size > 0) {
+    result = result.filter(item => filterState.performance.has(gradePerformance(item.performanceRatio).cls));
+  }
+
+  // 게시일 필터
+  const cutoff = periodCutoff(filterState.period);
+  if (cutoff) {
+    result = result.filter(item => {
+      const pub = item.video.snippet?.publishedAt;
+      return pub && new Date(pub) >= cutoff;
+    });
+  }
+
+  // 정렬
+  if (filterState.sort === 'viewCount') {
+    result.sort((a, b) =>
+      parseInt(b.video.statistics?.viewCount || '0', 10) -
+      parseInt(a.video.statistics?.viewCount || '0', 10));
+  } else if (filterState.sort === 'contribution') {
+    result.sort((a, b) => (b.contributionRatio ?? -Infinity) - (a.contributionRatio ?? -Infinity));
+  } else if (filterState.sort === 'performance') {
+    result.sort((a, b) => (b.performanceRatio ?? -Infinity) - (a.performanceRatio ?? -Infinity));
+  } else if (filterState.sort === 'date') {
+    result.sort((a, b) => (b.video.snippet?.publishedAt || '').localeCompare(a.video.snippet?.publishedAt || ''));
+  } else {
+    // 관련성: API 원래 순서
+    result.sort((a, b) => a._origIndex - b._origIndex);
+  }
+
+  // 렌더
+  if (!result.length) {
+    out.innerHTML = `
+      <div class="state-view">
+        <div class="state-icon">🔍</div>
+        <div class="state-title">조건에 맞는 결과가 없습니다</div>
+        <div class="state-desc">필터를 조정해보세요.</div>
+      </div>`;
+  } else {
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    result.forEach(item => grid.appendChild(buildCard(item)));
+    out.innerHTML = '';
+    out.appendChild(grid);
+  }
+
+  // 결과 카운트
+  const total = _allItems.length;
+  const shown = result.length;
+  document.getElementById('resultsCount').textContent =
+    shown === total ? `검색 결과 ${total}개` : `검색 결과 ${shown} / ${total}개`;
+}
+
+/* ===================================================
+   북마크
+=================================================== */
+function getBookmarks() {
+  try { return JSON.parse(localStorage.getItem(KEY_BM) || '[]'); } catch { return []; }
+}
+function saveBookmarks(arr) { localStorage.setItem(KEY_BM, JSON.stringify(arr)); }
+function isBookmarked(vid) { return getBookmarks().some(b => b.videoId === vid); }
+
+function addBookmark(item) {
+  const bms = getBookmarks();
+  if (bms.find(b => b.videoId === (item.video.id?.videoId || item.video.id))) return;
+  const v  = item.video;
+  const c  = item.channel;
+  const sn = v.snippet || {};
+  const st = v.statistics || {};
+  const cd = v.contentDetails || {};
+  bms.unshift({
+    videoId:          v.id?.videoId || v.id,
+    title:            sn.title,
+    thumbnail:        sn.thumbnails?.medium?.url,
+    viewCount:        st.viewCount,
+    publishedAt:      sn.publishedAt,
+    duration:         cd.duration,
+    channelTitle:     sn.channelTitle,
+    channelId:        sn.channelId,
+    channelThumbnail: c?.snippet?.thumbnails?.default?.url || null,
+    subscriberCount:  c?.statistics?.subscriberCount || null,
+    channelVideoCount:c?.statistics?.videoCount || null,
+    contributionRatio:item.contributionRatio,
+    performanceRatio: item.performanceRatio,
+    savedAt:          new Date().toISOString(),
+  });
+  saveBookmarks(bms);
+}
+
+function removeBookmark(vid) {
+  saveBookmarks(getBookmarks().filter(b => b.videoId !== vid));
+}
+
+function toggleBookmark(vid, btn) {
+  if (isBookmarked(vid)) {
+    removeBookmark(vid);
+    btn.textContent = '☆';
+    btn.classList.remove('bookmarked');
+    btn.title = '북마크 저장';
+  } else {
+    const item = _allItems.find(i => (i.video.id?.videoId || i.video.id) === vid);
+    if (item) {
+      addBookmark(item);
+      btn.textContent = '★';
+      btn.classList.add('bookmarked');
+      btn.title = '북마크 해제';
+    }
+  }
+}
+
+function removeBookmarkCard(vid, btn) {
+  removeBookmark(vid);
+  const card = btn.closest('.card');
+  if (card) card.remove();
+  // 검색 결과에서 별 동기화
+  document.querySelectorAll(`#searchOutput [data-vid="${vid}"] .bookmark-btn`).forEach(b => {
+    b.textContent = '☆';
+    b.classList.remove('bookmarked');
+    b.title = '북마크 저장';
+  });
+  // 북마크 탭 빈 상태 체크
+  const grid = document.querySelector('#bookmarkOutput .grid');
+  if (grid && !grid.querySelector('.card')) {
+    showState(document.getElementById('bookmarkOutput'), '⭐', '저장된 북마크가 없습니다', '검색 결과에서 별 아이콘을 클릭해 북마크를 저장하세요.');
+  }
+}
+
+function renderBookmarks() {
+  const out = document.getElementById('bookmarkOutput');
+  const bms = getBookmarks();
+  if (!bms.length) {
+    showState(out, '⭐', '저장된 북마크가 없습니다', '검색 결과에서 별 아이콘을 클릭해 북마크를 저장하세요.');
+    return;
+  }
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  bms.forEach(b => {
+    // 북마크 데이터를 video/channel 구조로 래핑
+    const fakeVideo = {
+      id: b.videoId,
+      snippet: {
+        title: b.title,
+        thumbnails: { medium: { url: b.thumbnail } },
+        publishedAt: b.publishedAt,
+        channelTitle: b.channelTitle,
+        channelId: b.channelId,
+      },
+      statistics: { viewCount: b.viewCount },
+      contentDetails: { duration: b.duration },
+    };
+    const fakeChannel = b.subscriberCount !== null ? {
+      snippet: { thumbnails: { default: { url: b.channelThumbnail } } },
+      statistics: { subscriberCount: b.subscriberCount, videoCount: b.channelVideoCount },
+    } : null;
+    grid.appendChild(buildCard({
+      video: fakeVideo,
+      channel: fakeChannel,
+      performanceRatio: b.performanceRatio,
+      contributionRatio: b.contributionRatio,
+      savedAt: b.savedAt,
+      isBookmarkView: true,
+    }));
+  });
+  out.innerHTML = '';
+  out.appendChild(grid);
+}
+
+/* ===================================================
+   탭 전환
+=================================================== */
+function switchTab(name) {
+  ['search','bookmark'].forEach(n => {
+    document.getElementById(`panel${n.charAt(0).toUpperCase()+n.slice(1)}`).classList.toggle('active', n === name);
+    document.getElementById(`tab${n.charAt(0).toUpperCase()+n.slice(1)}`).classList.toggle('active', n === name);
+  });
+  if (name === 'bookmark') renderBookmarks();
+}
+
+/* ===================================================
+   메인 검색
+=================================================== */
+async function handleSearch(e) {
+  e.preventDefault();
+
+  if (!getApiKey()) { showApiKeyModal(true); return; }
+  if (getQuotaUsed() >= QUOTA_LIMIT) {
+    showState(document.getElementById('searchOutput'), '⚠️', '할당량 초과', '오늘의 API 할당량을 초과했습니다. 내일 다시 시도하세요.');
+    return;
+  }
+
+  const keyword = document.getElementById('keywordInput').value.trim();
+  if (!keyword) { document.getElementById('keywordInput').focus(); return; }
+
+  const out = document.getElementById('searchOutput');
+  showLoading(out);
+  document.getElementById('resultsInfo').classList.remove('visible');
+  document.getElementById('searchBtn').disabled = true;
+
+  try {
+    const order      = document.getElementById('sortSelect').value;
+    const maxResults = parseInt(document.getElementById('countSelect').value, 10);
+    const period     = document.getElementById('periodSelect').value;
+
+    // 1단계: 검색
+    const searchResp = await searchVideos(keyword, { order, maxResults, period });
+    const searchItems = searchResp.items || [];
+
+    if (!searchItems.length) {
+      showState(out, '🔍', '검색 결과가 없습니다', '다른 키워드로 시도해보세요.');
+      addQuotaUsage(100);
+      _allItems = [];
+      _items    = [];
+      document.getElementById('filterBar').classList.remove('visible');
+      document.getElementById('resultsCount').textContent = '검색 결과 0개';
+      document.getElementById('resultsInfo').classList.add('visible');
+      renderQuota();
+      return;
+    }
+
+    const videoIds   = searchItems.map(i => i.id.videoId).filter(Boolean);
+    const channelIds = [...new Set(searchItems.map(i => i.snippet.channelId).filter(Boolean))];
+
+    // 2, 3단계 병렬
+    const [videoResp, channelResp] = await Promise.all([
+      fetchVideoDetails(videoIds),
+      channelIds.length ? fetchChannelDetails(channelIds) : Promise.resolve({ items: [] }),
+    ]);
+
+    // 머지 + 메트릭 (원래 순서 인덱스 보존)
+    const merged = mergeData(videoResp, channelResp);
+    _allItems = merged.map(({ video, channel }, idx) => ({
+      video, channel, ...calculateMetrics(video, channel), _origIndex: idx,
+    }));
+    _items = _allItems; // 북마크 참조용
+
+    // 할당량: search 100 + videos 1 + channels 1
+    addQuotaUsage(102);
+
+    // 필터 초기화 후 렌더
+    resetFilters();
+    document.getElementById('filterBar').classList.toggle('visible', _allItems.length > 0);
+    applyFilters();
+
+    document.getElementById('resultsInfo').classList.add('visible');
+    renderQuota();
+
+  } catch (err) {
+    console.error(err);
+    const msg = err.code === 'INVALID_KEY'     ? 'API 키가 유효하지 않습니다. 다시 확인해주세요.'
+              : err.code === 'QUOTA_EXCEEDED'   ? '오늘의 API 할당량을 초과했습니다. 내일 다시 시도하세요.'
+              : !navigator.onLine               ? '연결에 실패했습니다. 인터넷 연결을 확인해주세요.'
+              :                                   '알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    showState(out, '⚠️', '오류가 발생했습니다', msg);
+    if (err.code === 'INVALID_KEY') showApiKeyModal(false);
+  } finally {
+    syncSearchBtn();
+  }
+}
+
+/* ===================================================
+   모달 이벤트
+=================================================== */
+document.getElementById('saveKeyBtn').addEventListener('click', () => {
+  const input = document.getElementById('apiKeyInput');
+  const errEl = document.getElementById('apiKeyErr');
+  const key   = input.value.trim();
+  if (!key) {
+    input.classList.add('err');
+    errEl.textContent = 'API 키를 입력해주세요.';
+    errEl.classList.add('visible');
+    return;
+  }
+  setApiKey(key);
+  hideApiKeyModal();
+});
+
+document.getElementById('removeKeyBtn').addEventListener('click', () => {
+  if (confirm('API 키를 제거하시겠습니까?')) { setApiKey(''); hideApiKeyModal(); }
+});
+
+document.getElementById('modalCancelBtn').addEventListener('click', hideApiKeyModal);
+
+document.getElementById('modalCloseBtn').addEventListener('click', () => {
+  if (getApiKey()) hideApiKeyModal(); // 키 없을 때 X로 닫기 불가
+});
+
+document.getElementById('apiKeyModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('apiKeyModal') && getApiKey()) hideApiKeyModal();
+});
+
+document.getElementById('apiKeyInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('saveKeyBtn').click();
+});
+
+/* ===================================================
+   초기화
+=================================================== */
+(function init() {
+  if (!getApiKey()) setApiKey('AIzaSyD3QnLMUZh_Qi5RdWItQBQXOwpWgEBpazA');
+  resetQuotaIfNewDay();
+  syncSearchBtn();
+  renderQuota();
+})();
+</script>
+</body>
+</html>
