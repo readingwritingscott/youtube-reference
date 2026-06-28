@@ -319,6 +319,53 @@
     .metric-grade.bad { background: var(--grade-bad); }
     .metric-grade.na { background: #E5E7EB; color: var(--text-secondary); }
     .metric-value { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    /* 지표 설명 툴팁 */
+    .metric-info {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: 1px solid var(--text-tertiary);
+      color: var(--text-tertiary);
+      font-size: 8px;
+      font-weight: 700;
+      cursor: help;
+      position: relative;
+      margin-left: 3px;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    .metric-info .tip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 7px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1A1A1A;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 400;
+      line-height: 1.55;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      width: 160px;
+      white-space: normal;
+      z-index: 50;
+      pointer-events: none;
+      font-family: var(--font-body);
+    }
+    .metric-info .tip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #1A1A1A;
+    }
+    .metric-info:hover .tip { display: block; }
 
     /* 카드 푸터 */
     .card-footer {
@@ -642,6 +689,14 @@
             <button class="flt-btn"        data-sort="date"         onclick="setSortFilter(this)">최신순</button>
           </div>
         </div>
+        <div class="filter-group">
+          <span class="filter-label">유형</span>
+          <div class="filter-btns">
+            <button class="flt-btn active" data-ctype=""       onclick="setContentTypeFilter(this)">전체</button>
+            <button class="flt-btn"        data-ctype="shorts" onclick="setContentTypeFilter(this)">숏폼 ≤60s</button>
+            <button class="flt-btn"        data-ctype="normal" onclick="setContentTypeFilter(this)">일반영상</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -919,12 +974,18 @@ function buildCard({ video, channel, performanceRatio, contributionRatio, savedA
       <hr class="card-divider">
       <div class="metrics">
         <div class="metric">
-          <div class="metric-label">기여도</div>
+          <div class="metric-label">
+            기여도
+            <span class="metric-info">?<span class="tip">채널 평균 조회수 대비 이 영상의 조회수 비율. 채널 내에서 얼마나 두드러지는지 나타냅니다.</span></span>
+          </div>
           <span class="metric-grade ${cg.cls}">${cg.label}</span>
           <div class="metric-value">${esc(fmtRatio(contributionRatio))}</div>
         </div>
         <div class="metric">
-          <div class="metric-label">성과도</div>
+          <div class="metric-label">
+            성과도
+            <span class="metric-info">?<span class="tip">구독자 수 대비 이 영상의 조회수 비율. 알고리즘 추천 강도를 나타냅니다.</span></span>
+          </div>
           <span class="metric-grade ${pg.cls}">${pg.label}</span>
           <div class="metric-value">${esc(fmtRatio(performanceRatio))}</div>
         </div>
@@ -969,8 +1030,9 @@ function showLoading(container) {
 const filterState = {
   contribution: new Set(), // 선택된 기여도 등급
   performance:  new Set(), // 선택된 성과도 등급
-  period: '',              // '' | 'week' | 'month' | '3months' | '6months' | 'year'
-  sort:   'relevance',     // 'relevance' | 'viewCount' | 'contribution' | 'performance' | 'date'
+  period:      '',         // '' | 'week' | 'month' | '3months' | '6months' | 'year'
+  sort:        'relevance',// 'relevance' | 'viewCount' | 'contribution' | 'performance' | 'date'
+  contentType: '',         // '' | 'shorts' | 'normal'
 };
 
 function toggleGradeFilter(btn) {
@@ -1001,14 +1063,29 @@ function setSortFilter(btn) {
   applyFilters();
 }
 
+function setContentTypeFilter(btn) {
+  filterState.contentType = btn.dataset.ctype;
+  document.querySelectorAll('#filterBar [data-ctype]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function getDurationSeconds(iso) {
+  const m = iso?.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return null;
+  return parseInt(m[1]||'0',10)*3600 + parseInt(m[2]||'0',10)*60 + parseInt(m[3]||'0',10);
+}
+
 function resetFilters() {
   filterState.contribution.clear();
   filterState.performance.clear();
-  filterState.period = '';
-  filterState.sort   = 'relevance';
+  filterState.period      = '';
+  filterState.sort        = 'relevance';
+  filterState.contentType = '';
   document.querySelectorAll('.flt-btn[data-grade]').forEach(b => { b.className = 'flt-btn'; });
   document.querySelectorAll('#filterBar [data-period]').forEach(b => b.classList.toggle('active', b.dataset.period === ''));
   document.querySelectorAll('#filterBar [data-sort]').forEach(b => b.classList.toggle('active', b.dataset.sort === 'relevance'));
+  document.querySelectorAll('#filterBar [data-ctype]').forEach(b => b.classList.toggle('active', b.dataset.ctype === ''));
 }
 
 function periodCutoff(p) {
@@ -1042,6 +1119,15 @@ function applyFilters() {
     result = result.filter(item => {
       const pub = item.video.snippet?.publishedAt;
       return pub && new Date(pub) >= cutoff;
+    });
+  }
+
+  // 숏폼/일반 필터
+  if (filterState.contentType) {
+    result = result.filter(item => {
+      const secs = getDurationSeconds(item.video.contentDetails?.duration);
+      if (secs === null) return filterState.contentType === 'normal';
+      return filterState.contentType === 'shorts' ? secs <= 60 : secs > 60;
     });
   }
 
