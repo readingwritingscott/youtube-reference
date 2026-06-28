@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>유튜브 레퍼런스 수집기 - 사용법</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<style>
+  :root {
+    --bg: #FBF9F4;
+    --card: #FFFFFF;
+    --text: #2D2A26;
+    --text-soft: #6B6560;
+    --accent: #C2410C;
+    --accent-soft: #FED7AA;
+    --border: #EAE5DC;
+    --highlight: #FEF3C7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Pretendard', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 60px 32px 80px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 56px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header .eyebrow {
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  header h1 {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  header p {
+    color: var(--text-soft);
+    font-size: 17px;
+  }
+
+  section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 36px 32px;
+    margin-bottom: 24px;
+  }
+
+  section h2 {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  section h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 24px;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  p { margin-bottom: 14px; }
+  p:last-child { margin-bottom: 0; }
+
+  ol, ul {
+    padding-left: 0;
+    list-style: none;
+    margin-bottom: 14px;
+  }
+
+  ol li, ul li {
+    padding-left: 32px;
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  ol { counter-reset: step; }
+
+  ol li::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 22px;
+    height: 22px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  ul li::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 14px;
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  .box {
+    background: var(--highlight);
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin: 18px 0;
+    border-left: 4px solid #F59E0B;
+  }
+
+  .box strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #92400E;
+  }
+
+  .tip {
+    background: #F0F9FF;
+    border-left-color: #0284C7;
+  }
+
+  .tip strong { color: #075985; }
+
+  kbd {
+    background: var(--text);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .metric-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 14px 0;
+  }
+
+  .metric-card .label {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .metric-card .title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .grade-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .grade {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+  }
+
+  .g-excellent { background: #166534; }
+  .g-great { background: #16A34A; }
+  .g-good { background: #65A30D; }
+  .g-soso { background: #CA8A04; }
+  .g-bad { background: #6B7280; }
+
+  .qa {
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
+    margin-top: 18px;
+  }
+  .qa:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+
+  .qa .q {
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .qa .q::before {
+    content: 'Q. ';
+    color: var(--accent);
+    font-weight: 800;
+  }
+  .qa .a {
+    color: var(--text-soft);
+    padding-left: 22px;
+  }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 32px;
+    text-align: center;
+    color: var(--text-soft);
+    font-size: 15px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer .heart {
+    color: var(--accent);
+    font-size: 18px;
+  }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 40px 20px 60px; }
+    header h1 { font-size: 28px; }
+    section { padding: 28px 22px; }
+    section h2 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">사용 가이드</div>
+  <h1>유튜브 레퍼런스 수집기</h1>
+  <p>유튜브 영상을 검색하고, 좋은 레퍼런스를 모으는 도구</p>
+</header>
+
+<section>
+  <h2><span class="num">1</span> 시작하기</h2>
+  <p>이 폴더 안에 있는 <strong>index.html</strong> 파일을 더블클릭하면 됩니다. 그러면 인터넷 브라우저(크롬, 엣지 등)가 자동으로 열리면서 도구가 실행돼요.</p>
+
+  <div class="box tip">
+    <strong>💡 자주 쓰실 거라면</strong>
+    index.html 파일을 마우스 우클릭 → "바로 가기 만들기" → 만들어진 바로가기를 바탕화면으로 옮겨두세요. 그러면 바탕화면에서 한 번에 켜실 수 있어요.
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">2</span> 영상 검색하기</h2>
+  <ol>
+    <li>화면 위쪽 검색창에 찾고 싶은 키워드를 입력합니다. (예: "캠핑 브이로그", "에세이 책 추천")</li>
+    <li>옆에 있는 옵션을 골라요.
+      <ul>
+        <li><strong>정렬</strong>: 관련성 / 최신순 / 조회수순</li>
+        <li><strong>개수</strong>: 한 번에 몇 개 영상을 가져올지 (10/20/50)</li>
+        <li><strong>기간</strong>: 최근 영상만 보고 싶다면 선택</li>
+      </ul>
+    </li>
+    <li><strong>검색 버튼</strong>을 누릅니다. 잠깐 기다리면 카드가 죽 펼쳐져요.</li>
+    <li>관심 가는 카드의 <strong>제목을 클릭</strong>하면 새 탭에서 유튜브 영상이 열립니다.</li>
+  </ol>
+</section>
+
+<section>
+  <h2><span class="num">3</span> 카드의 숫자, 이게 핵심이에요</h2>
+  <p>각 영상 카드에는 두 가지 점수가 표시됩니다. 단순한 조회수만 보는 게 아니라, <strong>이 영상이 얼마나 잘 됐는지를 알려주는 지표</strong>예요.</p>
+
+  <div class="metric-card">
+    <div class="label">성과도</div>
+    <div class="title">구독자보다 얼마나 더 많이 봤는지</div>
+    <p style="color: var(--text-soft); font-size: 15px;">
+      구독자가 1,000명인 채널에서 영상이 10,000회 재생됐다면 → <strong>성과도 10배</strong>.<br>
+      알고리즘이 구독자 밖으로 영상을 많이 추천했다는 신호예요. <strong>높을수록 좋아요.</strong>
+    </p>
+    <div class="grade-row">
+      <span class="grade g-excellent">Excellent (10배↑)</span>
+      <span class="grade g-great">Great (3~10배)</span>
+      <span class="grade g-good">Good (1~3배)</span>
+      <span class="grade g-soso">Soso (0.5~1배)</span>
+      <span class="grade g-bad">Bad (0.5배↓)</span>
+    </div>
+  </div>
+
+  <div class="metric-card">
+    <div class="label">기여도</div>
+    <div class="title">채널 내 다른 영상들에 비해 얼마나 잘 됐는지</div>
+    <p style="color: var(--text-soft); font-size: 15px;">
+      이 채널의 평균 조회수가 1만이고, 이 영상이 5만 회라면 → <strong>기여도 5배</strong>.<br>
+      이 영상은 채널의 대표작이라는 뜻이에요. <strong>레퍼런스로 삼기 딱 좋은 영상입니다.</strong>
+    </p>
+    <div class="grade-row">
+      <span class="grade g-excellent">Excellent (5배↑)</span>
+      <span class="grade g-great">Great (2~5배)</span>
+      <span class="grade g-good">Good (1~2배)</span>
+      <span class="grade g-soso">Soso (0.5~1배)</span>
+      <span class="grade g-bad">Bad (0.5배↓)</span>
+    </div>
+  </div>
+
+  <div class="box">
+    <strong>🎯 어떤 영상을 봐야 할까?</strong>
+    두 지표 모두 <strong>Great 이상</strong>인 영상이 가장 좋은 레퍼런스예요. 알고리즘도 인정했고, 채널 안에서도 잘된 영상이니까요.
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">4</span> 좋은 영상은 북마크에 저장</h2>
+  <ol>
+    <li>마음에 드는 카드에 있는 <strong>별(☆) 아이콘</strong>을 클릭합니다.</li>
+    <li>별이 노랗게 채워지면 저장된 거예요.</li>
+    <li>화면 위쪽 <strong>"북마크" 탭</strong>으로 가면 저장한 영상들을 모아 볼 수 있어요.</li>
+    <li>북마크에서 빼고 싶을 땐 별을 다시 한 번 클릭하면 됩니다.</li>
+  </ol>
+
+  <div class="box tip">
+    <strong>💡 북마크는 이 컴퓨터에만 저장돼요</strong>
+    북마크는 이 브라우저에 저장되기 때문에, 다른 컴퓨터나 다른 브라우저에서는 보이지 않아요. 항상 같은 컴퓨터에서 사용하시면 괜찮습니다.
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">5</span> 문제가 생겼을 때</h2>
+
+  <div class="qa">
+    <div class="q">검색했는데 아무것도 안 나와요</div>
+    <div class="a">검색어를 더 짧고 일반적인 단어로 바꿔보세요. "캠핑 의자 추천 2026"보다는 "캠핑 의자"가 결과가 더 많아요.</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">"할당량을 초과했습니다"라는 메시지가 나와요</div>
+    <div class="a">유튜브가 정한 하루 검색 한도(약 100번)를 다 썼다는 뜻이에요. 내일이면 자동으로 다시 사용할 수 있습니다.</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">"API 키" 어쩌고 메시지가 나와요</div>
+    <div class="a">남편에게 알려주세요. 처음 한 번만 설정하면 되는 부분인데, 가끔 다시 입력이 필요할 수 있어요.</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">카드가 너무 작거나 깨져 보여요</div>
+    <div class="a">브라우저 화면을 더 넓게 만들거나, 화면 확대/축소를 조정해보세요. (Ctrl + 마우스 휠로 조절 가능)</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">실수로 북마크를 지웠어요</div>
+    <div class="a">아쉽지만 복구는 어려워요. 중요한 영상은 따로 메모해두는 것도 방법이에요.</div>
+  </div>
+</section>
+
+<footer>
+  <p>만든 사람 <span class="heart">♥</span> 남편</p>
+  <p style="margin-top: 8px; font-size: 14px;">막히는 부분이 있으면 언제든 물어봐 :)</p>
+</footer>
+
+</div>
+</body>
+</html>
